@@ -1,5 +1,7 @@
 # iAsset-PandaDevice
 
+This repository has iAsset-Basyx (master) as a submodule to build the required projects: basyx.sdk and basyx.components
+
 ## Steps to make this project work in your Eclipse IDE:
 
 1) Import -> Existing Maven Project
