@@ -8,7 +8,9 @@
 3) mvn install
 4) clean compile
 
+Instead you may also go to the root build directory and run ./build_java.sh
+
 ## Dependencies
 
-The Asset Administration Shell needs basyx.sdk and basyx.components
+The Panda-Device project needs basyx.sdk and basyx.components
 The basyx.components needs basyx.sdk
