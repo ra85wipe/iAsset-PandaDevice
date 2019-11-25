@@ -1,4 +1,4 @@
-# iAsset-AdministrationShell
+# iAsset-PandaDevice
 
 ## Steps to make this project work in your Eclipse IDE:
 
