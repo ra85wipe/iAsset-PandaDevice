@@ -1,6 +1,4 @@
-# iAsset-PandaDevice
-
-sample iAsset administration shell submodel to feature franca panda device implementation
+# iAsset-AdministrationShell
 
 ## Steps to make this project work in your Eclipse IDE:
 
