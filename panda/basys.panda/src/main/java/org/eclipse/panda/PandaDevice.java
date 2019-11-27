@@ -54,7 +54,7 @@ public class PandaDevice extends BaseSmartDevice {
 	/*********************************************************************************************************
 	 * Constructor
 	 ********************************************************************************************************/
-	public PandaDevice(int port) {
+	public PandaDevice(int port, String registryUrl) {
 		
 		super();
 		serverPort = port;
@@ -65,7 +65,7 @@ public class PandaDevice extends BaseSmartDevice {
 		addShortcut("Controller", new ModelUrn("urn:de.FHG:devices.es.iese:controllerSM:1.0:3:x-509#001"));
 
 		// Configure BaSyx service - registry and connection manager
-		setRegistry(new AASRegistryProxy("http://localhost:8080/basys.examples/Components/Directory/SQL"));
+		setRegistry(new AASRegistryProxy(registryUrl));
 		setConnectionManager(new VABConnectionManager(new ExamplesPreconfiguredDirectory(), new HTTPConnectorProvider()));
 	}
 	
@@ -84,7 +84,6 @@ public class PandaDevice extends BaseSmartDevice {
 		int invocations = (int) property.get("value");
 		aasServerConnection.setModelPropertyValue("/aas/submodels/Status/dataElements/invocations/value", ++invocations);
 	}
-
 	
 	/*********************************************************************************************************
 	 * Smart device control component indicates an execution state change
@@ -99,30 +98,29 @@ public class PandaDevice extends BaseSmartDevice {
 				newExecutionState.getValue());
 	}
 	
-	
 	/*********************************************************************************************************
 	 * CreateSubModel
 	 * Create generic sub model and add properties
 	 ********************************************************************************************************/
-	private void CreateSubModel() {
+	private void CreateSubModel(String submodelName) {
 		
-		SubModel statusSM = new SubModel();
-		statusSM.setIdShort("Status");
+		SubModel sub = new SubModel();
+		sub.setIdShort(submodelName);
 				
-		//   - Property status: indicate device status
+		// Property status: indicate device status
 		Property statusProp = new Property("offline");
 		statusProp.setIdShort("status");
-		statusSM.addSubModelElement(statusProp);
+		sub.addSubModelElement(statusProp);
 				
-		//   - Property statistics: export invocation statistics for every service
-		//     - invocations: indicate total service invocations. Properties are not persisted in this example,
-		//                    therefore we start counting always at 0.
+		// Property statistics: export invocation statistics for every service
+		// invocations: indicate total service invocations. 
+		// Properties are not persisted in this example, therefore start counting always at 0.
 		Property invocationsProp = new Property(0);
 		invocationsProp.setIdShort("invocations");
-		statusSM.addSubModelElement(invocationsProp);
+		sub.addSubModelElement(invocationsProp);
 				
-		// - Transfer device sub model to server
-		aasServerConnection.createValue("/aas/submodels", statusSM);
+		// Transfer device sub model to server
+		aasServerConnection.createValue("/aas/submodels", sub);
 	}
 	
 	/*********************************************************************************************************
@@ -159,7 +157,7 @@ public class PandaDevice extends BaseSmartDevice {
 		aasServerConnection.createValue("/aas", aas); // - Transfer device AAS to server
 
 		// The device also brings a sub model structure with an own ID that is being pushed on the server
-		CreateSubModel();
+		CreateSubModel("Status");
 		
 		// Register control component as local sub model (This sub model will stay with the device) 
 		server = new BaSyxTCPServer<>(new VABMapProvider(getControlComponent()), serverPort);
@@ -178,7 +176,6 @@ public class PandaDevice extends BaseSmartDevice {
 	public void stop() {		
 		server.stop(); // Stop local BaSyx/TCP server
 	}
-
 
 	/*********************************************************************************************************
 	 * Wait for completion of all threads

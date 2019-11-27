@@ -11,26 +11,16 @@ import org.junit.Test;
  * 
  * @author mathias.schmoigl
  ********************************************************************************************************/
-public class PandaDeviceTest  extends BaseSmartDevice{
+public class PandaDeviceTest {
 	
 	// device under test
-	PandaDevice testDevice = new PandaDevice(1);
+	PandaDevice testDevice = new PandaDevice(1, "http://localhost:8080/basys.examples/Components/Directory/SQL");
 	
 
 	/*********************************************************************************************************
 	 * Constructor
 	 ********************************************************************************************************/
-	public PandaDeviceTest() {
-		super();
-	}
-	
-	/*********************************************************************************************************
-	 * Start application
-	 ********************************************************************************************************/
-	//@Override
-	//public void start() {
-		//super.start();	
-	//}
+	public PandaDeviceTest() {}
 	
 	/*********************************************************************************************************
 	 * Test sequence:

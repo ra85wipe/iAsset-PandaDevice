@@ -4,6 +4,9 @@ package org.eclipse.panda;
 /********************************************************************************************************
  * This class represents robot franka panda state object as defined by franka lib
  * 
+ * see wiki page:
+ * https://secure.salzburgresearch.at/wiki/pages/viewpage.action?pageId=31000016
+ * 
  * @author mathias.schmoigl
  ********************************************************************************************************/
 public class FrankaState  {
