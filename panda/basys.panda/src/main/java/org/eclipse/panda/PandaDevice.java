@@ -39,6 +39,9 @@ public class PandaDevice extends BaseSmartDevice {
 	// contains all franka information
 	private FrankaState frankaState;
 	
+	// is the bridge to real panda data
+	private PandaAdapter pandaAdapter;
+	
 	
 	/*********************************************************************************************************
 	 * Getter/Setter
@@ -50,6 +53,16 @@ public class PandaDevice extends BaseSmartDevice {
 	public void setFrankaState(FrankaState frankaState) {
 		this.frankaState = frankaState;
 	}
+	
+	public PandaAdapter getPandaAdapter() {
+		return pandaAdapter;
+	}
+
+	public void setPandaAdapter(PandaAdapter pandaAdapter) {
+		this.pandaAdapter = pandaAdapter;
+	}
+	
+	
 
 	/*********************************************************************************************************
 	 * Constructor
@@ -102,16 +115,46 @@ public class PandaDevice extends BaseSmartDevice {
 	 * CreateSubModel
 	 * Create generic sub model and add properties
 	 ********************************************************************************************************/
-	private void CreateSubModel(String submodelName) {
+	private void CreatePandaSubModel() {
 		
 		SubModel sub = new SubModel();
-		sub.setIdShort(submodelName);
-				
-		// Property status: indicate device status
-		Property statusProp = new Property("offline");
-		statusProp.setIdShort("status");
-		sub.addSubModelElement(statusProp);
-				
+		sub.setIdShort("FrankaPanda");
+		
+		
+		// add property for robot mode
+		Property modeProp = new Property(frankaState.robot_mode);
+		modeProp.setIdShort("robotMode");
+		sub.addSubModelElement(modeProp);
+		
+		
+		// add properties for positions in 3D working env
+		Property positionXProp = new Property(frankaState.O_T_EE[12]);
+		positionXProp.setIdShort("posX");
+		sub.addSubModelElement(positionXProp);
+		
+		Property positionYProp = new Property(frankaState.O_T_EE[13]);
+		positionYProp.setIdShort("posY");
+		sub.addSubModelElement(positionYProp);
+		
+		Property positionZProp = new Property(frankaState.O_T_EE[14]);
+		positionZProp.setIdShort("posZ");
+		sub.addSubModelElement(positionZProp);
+		
+		
+		// add property for panda force 
+		Property forceProp = new Property(frankaState.O_F_ext_hat_K[2]);
+		forceProp.setIdShort("force");
+		sub.addSubModelElement(forceProp);
+		
+		
+		// TODO: add property for gripper states
+		//actual_panda_gripper_states = rostopic/joint_states position[8]+position[9]; // ???	
+		//Property gripperProp = new Property(actual_panda_gripper_states);
+		//gripperProp.setIdShort("gripper");
+		//sub.addSubModelElement(gripperProp);
+		
+
+		// TEST:
 		// Property statistics: export invocation statistics for every service
 		// invocations: indicate total service invocations. 
 		// Properties are not persisted in this example, therefore start counting always at 0.
@@ -119,6 +162,7 @@ public class PandaDevice extends BaseSmartDevice {
 		invocationsProp.setIdShort("invocations");
 		sub.addSubModelElement(invocationsProp);
 				
+		
 		// Transfer device sub model to server
 		aasServerConnection.createValue("/aas/submodels", sub);
 	}
@@ -157,7 +201,7 @@ public class PandaDevice extends BaseSmartDevice {
 		aasServerConnection.createValue("/aas", aas); // - Transfer device AAS to server
 
 		// The device also brings a sub model structure with an own ID that is being pushed on the server
-		CreateSubModel("Status");
+		CreatePandaSubModel();
 		
 		// Register control component as local sub model (This sub model will stay with the device) 
 		server = new BaSyxTCPServer<>(new VABMapProvider(getControlComponent()), serverPort);
