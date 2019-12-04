@@ -16,7 +16,10 @@ import org.eclipse.basyx.vab.modelprovider.VABElementProxy;
 import org.eclipse.basyx.vab.modelprovider.map.VABMapProvider;
 import org.eclipse.basyx.vab.protocol.basyx.server.BaSyxTCPServer;
 import org.eclipse.basyx.vab.protocol.http.connector.HTTPConnectorProvider;
+import org.eclipse.panda.franka.*;
+import org.eclipse.panda.nodes.*;
 import org.eclipse.support.directory.ExamplesPreconfiguredDirectory;
+
 
 /********************************************************************************************************
  * This class implements the smart manufacturing robot franca panda
@@ -39,8 +42,13 @@ public class PandaDevice extends BaseSmartDevice {
 	// contains all franka information
 	private FrankaState frankaState;
 	
-	// is the bridge to real panda data
+	// is the bridge to kafka world
 	private PandaAdapter pandaAdapter;
+	
+	// ROS Nodes listening to messages from their topics
+	private ROSNode_FrankaStates nodeFrankaStates;
+	private ROSNode_JointStates nodeJointStates;
+	private ROSNode_PCHeartBeat nodePCHeartBeat;
 	
 	
 	/*********************************************************************************************************

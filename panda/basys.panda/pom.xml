@@ -17,6 +17,17 @@
 	    <name>data</name>
 	    <url>file://${project.basedir}/repo</url>
 	  </repository>
+	  
+	   <repository>
+        <id>rosjava_mvn</id>
+        <name>Public Rosjava repository</name>
+        <url>https://github.com/rosjava/rosjava_mvn_repo/raw/master</url>
+      </repository>
+      
+      <repository>
+        <id>jcenter</id>
+        <url>https://jcenter.bintray.com/</url>
+      </repository>
 	</repositories>
   
    <build>
@@ -270,5 +281,44 @@
 			<artifactId>basyx.components</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		
+		<!-- ros.org to implement a ROS node-->
+		<dependency>
+          	<groupId>org.ros.rosjava_core</groupId>
+          	<artifactId>rosjava</artifactId>
+          	<version>[0.3, 0.4)</version>
+        </dependency>
+        
+        <dependency>
+       		<groupId>org.ros.rosjava_messages</groupId>
+       		<artifactId>std_msgs</artifactId>
+       		<version>0.5.10</version>
+		</dependency>
+		
+		<dependency>
+       		<groupId>org.ros.rosjava_messages</groupId>
+       		<artifactId>sensor_msgs</artifactId>
+       		<version>1.12.5</version>
+		</dependency>
+		
+		<dependency>
+       		<groupId>org.ros.rosjava_bootstrap</groupId>
+       		<artifactId>message_generation</artifactId>
+       		<version>0.3.3</version>
+		</dependency>
+		
+		
+		<!--
+		<dependency>
+       		<groupId>org.ros.rosjava_bootstrap</groupId>
+       		<artifactId>rosjava_bootstrap</artifactId>
+       		<version>0.2.0</version>
+		</dependency>	
+		
+		<dependency>
+       		<groupId>org.ros.rosjava_messages</groupId>
+       		<artifactId>people_msgs</artifactId>
+       		<version>1.0.4</version>
+		</dependency> -->
   </dependencies>
 </project>

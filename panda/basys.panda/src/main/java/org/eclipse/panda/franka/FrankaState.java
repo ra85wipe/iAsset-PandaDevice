@@ -1,5 +1,5 @@
 
-package org.eclipse.panda;
+package org.eclipse.panda.franka;
 
 /********************************************************************************************************
  * This class represents robot franka panda state object as defined by franka lib

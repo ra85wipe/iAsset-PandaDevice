@@ -1,6 +1,5 @@
 package org.eclipse.panda;
 
-import org.eclipse.basyx.components.device.BaseSmartDevice;
 import org.junit.Test;
 
 /********************************************************************************************************

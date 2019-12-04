@@ -1,5 +1,5 @@
 
-package org.eclipse.panda;
+package org.eclipse.panda.franka;
 
 /********************************************************************************************************
  * This class represents a franka panda error object as defined in franca lib
