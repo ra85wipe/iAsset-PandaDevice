@@ -22,7 +22,7 @@ import org.eclipse.support.directory.ExamplesPreconfiguredDirectory;
 
 
 /********************************************************************************************************
- * This class implements the smart manufacturing robot franca panda
+ * This class implements the smart manufacturing robot franka panda
  * 
  * The device pushes its AAS to an external asset administration shell server
  * - The sub model "statusSM" is pushed to the external asset administration shell server as well

@@ -22,6 +22,7 @@ import org.ros.node.topic.Subscriber;
  ********************************************************************************************************/
 public class ROSNode_PCHeartBeat implements NodeMain {
 	
+	private static String ROS_MASTER_URI = "http://192.168.48.41:11311"; // export ROS_MASTER_URI=http://192.168.48.41:11311
 	private static String ROS_TOPIC_PANDA_PC_HEARTBEAT = "/panda_pc_heartbeat";
 
 
@@ -41,7 +42,9 @@ public class ROSNode_PCHeartBeat implements NodeMain {
 	  
 		final Log log = connectedNode.getLog();  
 	  
-		Subscriber<std_msgs.String> subscriberHeartBeat = connectedNode.newSubscriber(ROS_TOPIC_PANDA_PC_HEARTBEAT, std_msgs.String._TYPE);
+		Subscriber<std_msgs.String> subscriberHeartBeat = 
+				connectedNode.newSubscriber(ROS_MASTER_URI + ROS_TOPIC_PANDA_PC_HEARTBEAT, std_msgs.String._TYPE);
+		
 		subscriberHeartBeat.addMessageListener(new MessageListener<std_msgs.String>() 
 		{			  
 			@Override

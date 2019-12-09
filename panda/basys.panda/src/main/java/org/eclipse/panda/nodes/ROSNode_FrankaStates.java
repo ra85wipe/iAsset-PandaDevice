@@ -21,7 +21,8 @@ import org.ros.node.topic.Subscriber;
  * @author mathias.schmoigl
  ********************************************************************************************************/
 public class ROSNode_FrankaStates implements NodeMain {
-	
+		
+	private static String ROS_MASTER_URI = "http://192.168.48.41:11311"; // export ROS_MASTER_URI=http://192.168.48.41:11311
 	private static String ROS_TOPIC_FRANKA_STATES = "/franka_state_controller/franka_states";
 
 
@@ -41,7 +42,9 @@ public class ROSNode_FrankaStates implements NodeMain {
 	  
 		final Log log = connectedNode.getLog();
 	  
-		Subscriber<std_msgs.String> subscriberFrankaStates = connectedNode.newSubscriber(ROS_TOPIC_FRANKA_STATES, std_msgs.String._TYPE);
+		Subscriber<std_msgs.String> subscriberFrankaStates = 
+				connectedNode.newSubscriber(ROS_MASTER_URI + ROS_TOPIC_FRANKA_STATES, std_msgs.String._TYPE);
+		
 		subscriberFrankaStates.addMessageListener(new MessageListener<std_msgs.String>() 
 		{		  
 			@Override
