@@ -9,7 +9,10 @@ import org.eclipse.basyx.aas.metamodel.map.descriptor.SubmodelDescriptor;
 import org.eclipse.basyx.aas.registration.proxy.AASRegistryProxy;
 import org.eclipse.basyx.components.device.BaseSmartDevice;
 import org.eclipse.basyx.models.controlcomponent.ExecutionState;
+import org.eclipse.basyx.submodel.metamodel.api.reference.IReference;
 import org.eclipse.basyx.submodel.metamodel.map.SubModel;
+import org.eclipse.basyx.submodel.metamodel.map.qualifier.Description;
+import org.eclipse.basyx.submodel.metamodel.map.reference.Reference;
 import org.eclipse.basyx.submodel.metamodel.map.submodelelement.property.Property;
 import org.eclipse.basyx.vab.manager.VABConnectionManager;
 import org.eclipse.basyx.vab.modelprovider.VABElementProxy;
@@ -41,6 +44,7 @@ public class PandaDevice extends BaseSmartDevice {
 	
 	// contains all franka information
 	private FrankaState frankaState;
+	private JointState jointState;
 	
 	// is the bridge to kafka world
 	private PandaAdapter pandaAdapter;
@@ -127,39 +131,57 @@ public class PandaDevice extends BaseSmartDevice {
 		
 		SubModel sub = new SubModel();
 		sub.setIdShort("FrankaPanda");
-		
+		sub.setSemanticID((IReference) new Reference().put("27380107", null)); // e-class-ID "Roboterarm"
+		sub.setDescription(new Description("en", "Franka Panda submodel implements aas example for the iAsset Platform"));
+
 		
 		// add property for robot mode
 		Property modeProp = new Property(frankaState.robot_mode);
 		modeProp.setIdShort("robotMode");
-		sub.addSubModelElement(modeProp);
+		modeProp.setSemanticID((IReference) new Reference().put("0173-1#02-AAK543#004", null)); // e-class-ID "anwenderrelevante Ausführung"
+		modeProp.setDescription(new Description("en", "robot mode represents current state of franka panda robot"));	
+		sub.addSubModelElement(modeProp);		
 		
 		
 		// add properties for positions in 3D working env
 		Property positionXProp = new Property(frankaState.O_T_EE[12]);
 		positionXProp.setIdShort("posX");
+		positionXProp.setSemanticID((IReference) new Reference().put("0173-1#02-AAZ424#001", null)); // e-class-ID "Positionserkennung"
+		positionXProp.setDescription(new Description("en", "franka panda robot end effector position X"));
+		positionXProp.addDataSpecificationReference((IReference) new Reference().put("Centimeters", null));
 		sub.addSubModelElement(positionXProp);
 		
 		Property positionYProp = new Property(frankaState.O_T_EE[13]);
 		positionYProp.setIdShort("posY");
+		positionYProp.setSemanticID((IReference) new Reference().put("0173-1#02-AAZ424#001", null)); // e-class-ID "Positionserkennung"
+		positionYProp.setDescription(new Description("en", "franka panda robot end effector position Y"));
+		positionYProp.addDataSpecificationReference((IReference) new Reference().put("Newton", null));
 		sub.addSubModelElement(positionYProp);
 		
 		Property positionZProp = new Property(frankaState.O_T_EE[14]);
 		positionZProp.setIdShort("posZ");
+		positionZProp.setSemanticID((IReference) new Reference().put("0173-1#02-AAZ424#001", null)); // e-class-ID "Positionserkennung"
+		positionZProp.setDescription(new Description("en", "franka panda robot end effector position Z"));
+		positionZProp.addDataSpecificationReference((IReference) new Reference().put("Centimeters", null));
 		sub.addSubModelElement(positionZProp);
 		
 		
 		// add property for panda force 
-		Property forceProp = new Property(frankaState.O_F_ext_hat_K[2]);
-		forceProp.setIdShort("force");
+		Property forceProp = new Property(frankaState.O_F_ext_hat_K[3]);
+		forceProp.setIdShort("z-force");
+		forceProp.setSemanticID((IReference) new Reference().put("0173-1#02-AAI621#002", null)); // e-class-ID "Hebekraft"
+		forceProp.setDescription(new Description("en", "franka panda robot force for z-axis"));
+		forceProp.addDataSpecificationReference((IReference) new Reference().put("Centimeters", null));
 		sub.addSubModelElement(forceProp);
 		
 		
-		// TODO: add property for gripper states
-		//actual_panda_gripper_states = rostopic/joint_states position[8]+position[9]; // ???	
-		//Property gripperProp = new Property(actual_panda_gripper_states);
-		//gripperProp.setIdShort("gripper");
-		//sub.addSubModelElement(gripperProp);
+		// add property for gripper states
+		Property gripperProp = new Property(jointState.position[8] + jointState.position[9]); // gripper distance
+		gripperProp.setIdShort("gripper distance");
+		gripperProp.setSemanticID((IReference) new Reference().put("0173-1#02-AAZ424#001", null)); // e-class-ID "Positionserkennung"
+		gripperProp.setDescription(new Description("en", "distance of gripper parts to each other"));
+		gripperProp.addDataSpecificationReference((IReference) new Reference().put("Centimeters", null));
+		sub.addSubModelElement(gripperProp);
 		
 
 		// TEST:
