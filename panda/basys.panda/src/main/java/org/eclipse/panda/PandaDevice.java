@@ -22,6 +22,7 @@ import org.eclipse.basyx.vab.protocol.http.connector.HTTPConnectorProvider;
 import org.eclipse.panda.franka.*;
 import org.eclipse.panda.nodes.*;
 import org.eclipse.support.directory.ExamplesPreconfiguredDirectory;
+import org.ros.node.ConnectedNode;
 
 
 /********************************************************************************************************
@@ -49,10 +50,7 @@ public class PandaDevice extends BaseSmartDevice {
 	// is the bridge to kafka world
 	private PandaAdapter pandaAdapter;
 	
-	// ROS Nodes listening to messages from their topics
-	private ROSNode_FrankaStates nodeFrankaStates;
-	private ROSNode_JointStates nodeJointStates;
-	private ROSNode_PCHeartBeat nodePCHeartBeat;
+
 	
 	
 	/*********************************************************************************************************
@@ -61,7 +59,6 @@ public class PandaDevice extends BaseSmartDevice {
 	public FrankaState getFrankaState() {
 		return frankaState;
 	}
-
 	public void setFrankaState(FrankaState frankaState) {
 		this.frankaState = frankaState;
 	}
@@ -69,7 +66,6 @@ public class PandaDevice extends BaseSmartDevice {
 	public PandaAdapter getPandaAdapter() {
 		return pandaAdapter;
 	}
-
 	public void setPandaAdapter(PandaAdapter pandaAdapter) {
 		this.pandaAdapter = pandaAdapter;
 	}
@@ -225,7 +221,7 @@ public class PandaDevice extends BaseSmartDevice {
 	public void start() {
 
 		super.start();
-		
+
 		aasServerConnection = this.getConnectionManager().connectToVABElement("AASServer"); // Connect to AAS server
 		AssetAdministrationShell aas = new AssetAdministrationShell().putPath("idShort", "DeviceIDShort"); // Create device AAS
 		aasServerConnection.createValue("/aas", aas); // - Transfer device AAS to server
@@ -240,7 +236,7 @@ public class PandaDevice extends BaseSmartDevice {
 		server.start();
 		
 		// Register AAS and sub models in directory (push AAS descriptor to server)
-		RegisterSubModelsInDirectory("http://localhost:8080/basys.examples/Components/BaSys/1.0/aasServer/aas");			
+		RegisterSubModelsInDirectory("http://localhost:8080/basys.examples/Components/BaSys/1.0/aasServer/aas");
 	}
 
 	/*********************************************************************************************************

@@ -4,6 +4,7 @@ package org.eclipse.panda.nodes;
 import org.apache.commons.logging.Log;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
+import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
@@ -20,7 +21,7 @@ import org.ros.node.topic.Subscriber;
  * 
  * @author mathias.schmoigl
  ********************************************************************************************************/
-public class ROSNode_PCHeartBeat implements NodeMain {
+public class ROSNode_PCHeartBeat extends AbstractNodeMain {
 	
 	private static String ROS_MASTER_URI = "http://192.168.48.41:11311"; // export ROS_MASTER_URI=http://192.168.48.41:11311
 	private static String ROS_TOPIC_PANDA_PC_HEARTBEAT = "/panda_pc_heartbeat";
@@ -38,7 +39,7 @@ public class ROSNode_PCHeartBeat implements NodeMain {
 	 * onStart
 	 ********************************************************************************************************/
 	@Override
-	public void onStart(ConnectedNode connectedNode) {
+	public void onStart(final ConnectedNode connectedNode) {
 	  
 		final Log log = connectedNode.getLog();  
 	  
@@ -61,19 +62,19 @@ public class ROSNode_PCHeartBeat implements NodeMain {
 	@Override
 	public void onError(Node arg0, Throwable arg1) {
 		// TODO Auto-generated method stub
-		
+		arg0.getLog().info("I heard somthing!");
 	}
 
 	@Override
 	public void onShutdown(Node arg0) {
 		// TODO Auto-generated method stub
-		
+		arg0.getLog().info("I heard somthing!");
 	}
 
 	@Override
 	public void onShutdownComplete(Node arg0) {
 		// TODO Auto-generated method stub
-		
+		arg0.getLog().info("I heard somthing!");
 	}
 
 }

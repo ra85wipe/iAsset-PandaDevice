@@ -28,6 +28,6 @@ public class PandaAdapterTest {
 	public void test() throws Exception {
 		
 		// TODO
-		//testAdapter.start();
+		testAdapter.establishROSConnection();
 	}
 }
