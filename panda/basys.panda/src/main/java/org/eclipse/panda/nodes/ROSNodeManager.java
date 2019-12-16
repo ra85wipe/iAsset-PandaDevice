@@ -20,26 +20,23 @@ import java.net.URI;
  ********************************************************************************************************/
 public class ROSNodeManager {
 
-    private static String ROS_MASTER_URI = "http://192.168.48.41:11311"; // export ROS_MASTER_URI=http://192.168.48.41:11311
-
     // ROS Nodes listening to messages from their topics
     private ROSNode_FrankaStates nodeFrankaStates = new ROSNode_FrankaStates();
     private ROSNode_JointStates nodeJointStates = new ROSNode_JointStates();
-    private ROSNode_PCHeartBeat nodePCHeartBeat = new ROSNode_PCHeartBeat();
 
     public ROSNodeManager() {}
 
     public void executeROSNodes()
     {
-        URI masteruri = URI.create(ROS_MASTER_URI);
-        String host = "192.168.48.41";
+        // export ROS_MASTER_URI=http://192.168.48.41:11311
+        URI masteruri = URI.create("http://192.168.48.41:11311");
 
         //NodeConfiguration pubNodeConfiguration = NodeConfiguration.newPublic(host, masteruri); // Load the publisher(talker)
         //Preconditions.checkState(pubNodeMain != null); //Check if Talker class correctly instantiated
         //nodeMainExecutor.execute(nodeFrankaStates, pubNodeConfiguration); //execute the nodelet talker (this will run the method onStart of Talker.java)
 
         NodeMainExecutor nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
-        //NodeConfiguration subNodeConfiguration = NodeConfiguration.newPublic(host, masteruri); // Load the subscriber(listener)
+        //NodeConfiguration subNodeConfiguration = NodeConfiguration.newPublic("192.168.48.41", masteruri); // Load the subscriber(listener)
         NodeConfiguration subNodeConfiguration = NodeConfiguration.newPrivate(masteruri);
 
         Preconditions.checkState(nodeFrankaStates != null);
@@ -48,9 +45,7 @@ public class ROSNodeManager {
         Preconditions.checkState(nodeJointStates != null);
         nodeMainExecutor.execute(nodeJointStates, subNodeConfiguration);
 
-        //Preconditions.checkState(nodePCHeartBeat != null);
-        //nodeMainExecutor.execute(nodePCHeartBeat, subNodeConfiguration);
-
-        while(true){}
+        // uncomment to debug
+        //while(true){}
     }
 }
