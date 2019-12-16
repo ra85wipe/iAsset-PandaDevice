@@ -22,10 +22,8 @@ import org.ros.node.topic.Subscriber;
  * @author mathias.schmoigl
  ********************************************************************************************************/
 public class ROSNode_JointStates extends AbstractNodeMain {
-	
-	private static String ROS_MASTER_URI = "http://192.168.48.41:11311"; // export ROS_MASTER_URI=http://192.168.48.41:11311
-	private static String ROS_TOPIC_JOINT_STATES = "/joint_states";
 
+	private static String ROS_TOPIC_JOINT_STATES = "/joint_states";
 
 	/********************************************************************************************************
 	 * getDefaultNodeName
@@ -40,12 +38,11 @@ public class ROSNode_JointStates extends AbstractNodeMain {
 	 ********************************************************************************************************/
 	@Override
 	public void onStart(final ConnectedNode connectedNode) {
-	  
+
 		final Log log = connectedNode.getLog();
-	  
+
 		Subscriber<sensor_msgs.JointState> subscriberJointStates =
-				connectedNode.newSubscriber(ROS_MASTER_URI + ROS_TOPIC_JOINT_STATES, sensor_msgs.JointState._TYPE);
-		
+				connectedNode.newSubscriber(connectedNode.getName().toString(), sensor_msgs.JointState._TYPE);
 		subscriberJointStates.addMessageListener(new MessageListener<sensor_msgs.JointState>()
 		{		  
 			@Override

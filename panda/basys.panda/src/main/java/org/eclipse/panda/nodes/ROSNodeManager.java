@@ -50,5 +50,7 @@ public class ROSNodeManager {
 
         //Preconditions.checkState(nodePCHeartBeat != null);
         //nodeMainExecutor.execute(nodePCHeartBeat, subNodeConfiguration);
+
+        while(true){}
     }
 }

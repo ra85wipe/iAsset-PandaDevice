@@ -23,9 +23,7 @@ import org.ros.node.topic.Subscriber;
  ********************************************************************************************************/
 public class ROSNode_FrankaStates extends AbstractNodeMain {
 
-	private static String ROS_MASTER_URI = "http://192.168.48.41:11311"; // export ROS_MASTER_URI=http://192.168.48.41:11311
 	private static String ROS_TOPIC_FRANKA_STATES = "/franka_state_controller/franka_states";
-
 
 	/********************************************************************************************************
 	 * getDefaultNodeName
@@ -44,14 +42,14 @@ public class ROSNode_FrankaStates extends AbstractNodeMain {
 		final Log log = connectedNode.getLog();
 	  
 		Subscriber<franka_msgs.FrankaState> subscriberFrankaStates =
-				connectedNode.newSubscriber(ROS_MASTER_URI + ROS_TOPIC_FRANKA_STATES, franka_msgs.FrankaState._TYPE);
+				connectedNode.newSubscriber(connectedNode.getName().toString(), franka_msgs.FrankaState._TYPE);
 		
 		subscriberFrankaStates.addMessageListener(new MessageListener<franka_msgs.FrankaState>()
 		{		  
 			@Override
 			public void onNewMessage(franka_msgs.FrankaState message) {
 
-				log.info("I heard somthing!");
+				log.info("I heard something!");
 			}
 		});
 	}

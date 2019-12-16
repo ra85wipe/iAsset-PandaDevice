@@ -314,18 +314,25 @@
 		  <scope>system</scope>
 		  <systemPath>${project.basedir}/jars/franka_msgs-0.7.0.jar</systemPath>
 	  </dependency>
-		
-		<!--
-		<dependency>
-       		<groupId>org.ros.rosjava_bootstrap</groupId>
-       		<artifactId>rosjava_bootstrap</artifactId>
-       		<version>0.2.0</version>
-		</dependency>	
-		
-		<dependency>
-       		<groupId>org.ros.rosjava_messages</groupId>
-       		<artifactId>people_msgs</artifactId>
-       		<version>1.0.4</version>
-		</dependency> -->
+
+      <dependency>
+          <groupId>org.eclipse.basyx</groupId>
+          <artifactId>basyx.sdk</artifactId>
+          <version>0.0.1-SNAPSHOT</version>
+          <scope>compile</scope>
+      </dependency>
+
+      <!--
+      <dependency>
+             <groupId>org.ros.rosjava_bootstrap</groupId>
+             <artifactId>rosjava_bootstrap</artifactId>
+             <version>0.2.0</version>
+      </dependency>
+
+      <dependency>
+             <groupId>org.ros.rosjava_messages</groupId>
+             <artifactId>people_msgs</artifactId>
+             <version>1.0.4</version>
+      </dependency> -->
   </dependencies>
 </project>
