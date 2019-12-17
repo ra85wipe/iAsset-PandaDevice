@@ -47,6 +47,7 @@ public class ROSNode_JointStates extends AbstractNodeMain {
 		{		  
 			@Override
 			public void onNewMessage(sensor_msgs.JointState message) {
+
 				log.info("I heard something");
 			}
 		});
@@ -58,20 +59,26 @@ public class ROSNode_JointStates extends AbstractNodeMain {
 	 ********************************************************************************************************/
 	@Override
 	public void onError(Node arg0, Throwable arg1) {
-		// TODO Auto-generated method stub
-		arg0.getLog().info("I heard somthing!");
+
+		if(arg0 != null) {
+			arg0.getLog().info("Error happened!");
+		}
 	}
 
 	@Override
 	public void onShutdown(Node arg0) {
-		// TODO Auto-generated method stub
-		arg0.getLog().info("I heard somthing!");
+
+		if(arg0 != null) {
+			arg0.getLog().info("Shutdown happened!");
+		}
 	}
 
 	@Override
 	public void onShutdownComplete(Node arg0) {
-		// TODO Auto-generated method stub
-		arg0.getLog().info("I heard somthing!");
+
+		if(arg0 != null) {
+			arg0.getLog().info("Shutdown Complete happened!");
+		}
 	}
 
 }

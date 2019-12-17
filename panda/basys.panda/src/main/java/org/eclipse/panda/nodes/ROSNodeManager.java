@@ -44,8 +44,5 @@ public class ROSNodeManager {
 
         Preconditions.checkState(nodeJointStates != null);
         nodeMainExecutor.execute(nodeJointStates, subNodeConfiguration);
-
-        // uncomment to debug
-        //while(true){}
     }
 }
