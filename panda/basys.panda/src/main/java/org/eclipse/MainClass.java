@@ -15,6 +15,7 @@ public class MainClass {
     {
         // AAS device implementation of panda
         PandaDevice device = new PandaDevice(1, "http://localhost:8080/basys.examples/Components/Directory/SQL");
+        //device.start();
 
         // ROS panda adapter
         PandaAdapter adapter = new PandaAdapter();

@@ -49,18 +49,21 @@ public class PandaDevice extends BaseSmartDevice {
 	
 	// is the bridge to kafka world
 	private PandaAdapter pandaAdapter;
-	
 
-	
 	
 	/*********************************************************************************************************
 	 * Getter/Setter
 	 ********************************************************************************************************/
-	public FrankaState getFrankaState() {
-		return frankaState;
-	}
+	public FrankaState getFrankaState() { return frankaState; }
 	public void setFrankaState(FrankaState frankaState) {
 		this.frankaState = frankaState;
+	}
+
+	public JointState getJointState() {
+		return jointState;
+	}
+	public void setJointState(JointState jointState) {
+		this.jointState = jointState;
 	}
 	
 	public PandaAdapter getPandaAdapter() {
@@ -69,8 +72,7 @@ public class PandaDevice extends BaseSmartDevice {
 	public void setPandaAdapter(PandaAdapter pandaAdapter) {
 		this.pandaAdapter = pandaAdapter;
 	}
-	
-	
+
 
 	/*********************************************************************************************************
 	 * Constructor
@@ -229,10 +231,9 @@ public class PandaDevice extends BaseSmartDevice {
 		// The device also brings a sub model structure with an own ID that is being pushed on the server
 		CreatePandaSubModel();
 		
-		// Register control component as local sub model (This sub model will stay with the device) 
+		// Register control component as local sub model (This sub model will stay with the device)
+		// Start local BaSyx/TCP server
 		server = new BaSyxTCPServer<>(new VABMapProvider(getControlComponent()), serverPort);
-		
-		// - Start local BaSyx/TCP server
 		server.start();
 		
 		// Register AAS and sub models in directory (push AAS descriptor to server)
