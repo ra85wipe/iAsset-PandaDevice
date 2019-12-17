@@ -1,4 +1,4 @@
-package org.eclipse.panda.franka;
+package org.srfg.panda.franka;
 
 /********************************************************************************************************
  * This class represents robot joint state message object as defined by ROS

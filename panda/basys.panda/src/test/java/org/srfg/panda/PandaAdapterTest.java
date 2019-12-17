@@ -1,4 +1,4 @@
-package org.eclipse.panda;
+package org.srfg.panda;
 
 import org.junit.Test;
 

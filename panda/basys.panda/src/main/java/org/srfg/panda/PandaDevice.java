@@ -1,4 +1,4 @@
-package org.eclipse.panda;
+package org.srfg.panda;
 
 import java.util.Map;
 
@@ -19,9 +19,9 @@ import org.eclipse.basyx.vab.modelprovider.VABElementProxy;
 import org.eclipse.basyx.vab.modelprovider.map.VABMapProvider;
 import org.eclipse.basyx.vab.protocol.basyx.server.BaSyxTCPServer;
 import org.eclipse.basyx.vab.protocol.http.connector.HTTPConnectorProvider;
-import org.eclipse.panda.franka.*;
-import org.eclipse.panda.nodes.*;
-import org.eclipse.support.directory.ExamplesPreconfiguredDirectory;
+import org.srfg.panda.franka.*;
+import org.srfg.panda.nodes.*;
+import org.srfg.support.directory.ExamplesPreconfiguredDirectory;
 import org.ros.node.ConnectedNode;
 
 

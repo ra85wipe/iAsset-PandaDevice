@@ -1,7 +1,7 @@
-package org.eclipse;
+package org.srfg;
 
-import org.eclipse.panda.PandaAdapter;
-import org.eclipse.panda.PandaDevice;
+import org.srfg.panda.PandaAdapter;
+import org.srfg.panda.PandaDevice;
 
 /********************************************************************************************************
  * This class contains the main function implementation and

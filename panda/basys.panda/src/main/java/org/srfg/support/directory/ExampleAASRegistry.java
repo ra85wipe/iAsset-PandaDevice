@@ -1,4 +1,4 @@
-package org.eclipse.support.directory;
+package org.srfg.support.directory;
 
 import org.eclipse.basyx.aas.metamodel.map.descriptor.AASDescriptor;
 import org.eclipse.basyx.aas.metamodel.map.descriptor.ModelUrn;

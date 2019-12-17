@@ -1,4 +1,4 @@
-package org.eclipse.panda.nodes;
+package org.srfg.panda.nodes;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;

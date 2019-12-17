@@ -1,5 +1,5 @@
 
-package org.eclipse.panda.nodes;
+package org.srfg.panda.nodes;
 
 import org.apache.commons.logging.Log;
 import org.ros.message.MessageListener;

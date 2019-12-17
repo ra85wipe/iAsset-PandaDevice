@@ -1,13 +1,8 @@
-package org.eclipse.panda;
+package org.srfg.panda;
+
+import org.srfg.panda.nodes.ROSNodeManager;
 
 import java.util.Map;
-import java.io.FileReader;
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import org.eclipse.panda.nodes.ROSNodeManager;
-import org.json.JSONObject;
-
 import com.google.gson.JsonObject;
 
 
