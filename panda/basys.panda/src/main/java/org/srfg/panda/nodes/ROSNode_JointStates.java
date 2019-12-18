@@ -48,7 +48,7 @@ public class ROSNode_JointStates extends AbstractNodeMain {
 			@Override
 			public void onNewMessage(sensor_msgs.JointState message) {
 
-				log.info("I heard something");
+				log.info(message.getHeader().getSeq()); // log message package seq number
 			}
 		});
 	}

@@ -49,7 +49,7 @@ public class ROSNode_FrankaStates extends AbstractNodeMain {
 			@Override
 			public void onNewMessage(franka_msgs.FrankaState message) {
 
-				log.info("I heard something!");
+				log.info(message.getHeader().getSeq()); // log message package seq number
 			}
 		});
 	}
