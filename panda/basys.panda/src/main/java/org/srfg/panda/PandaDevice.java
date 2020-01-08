@@ -23,6 +23,7 @@ import org.eclipse.basyx.vab.protocol.http.connector.HTTPConnectorProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.srfg.panda.franka.*;
+import org.srfg.panda.nodes.ROSNodeManager;
 import org.srfg.support.directory.ExamplesPreconfiguredDirectory;
 
 
@@ -49,9 +50,9 @@ public class PandaDevice extends BaseSmartDevice {
 	/*********************************************************************************************************
 	 * private members required for panda communication via ROS
 	 ********************************************************************************************************/
+	private ROSNodeManager nodeManager = new ROSNodeManager();
 	private FrankaState frankaState;
 	private JointState jointState;
-	private PandaAdapter pandaAdapter;
 	
 	/*********************************************************************************************************
 	 * Getter/Setter
@@ -68,13 +69,17 @@ public class PandaDevice extends BaseSmartDevice {
 		this.jointState = jointState;
 	}
 	
-	public PandaAdapter getPandaAdapter() {
-		return pandaAdapter;
+	public ROSNodeManager getROSNodeManager() {
+		return nodeManager;
 	}
-	public void setPandaAdapter(PandaAdapter pandaAdapter) {
-		this.pandaAdapter = pandaAdapter;
+	public void setROSNodeManager(ROSNodeManager nodeManager) {
+		this.nodeManager = nodeManager;
 	}
 
+	public void establishROSConnection()
+	{
+		nodeManager.executeROSNodes();
+	}
 
 	/*********************************************************************************************************
 	 * Constructor
@@ -145,8 +150,8 @@ public class PandaDevice extends BaseSmartDevice {
 		super.onChangedExecutionState(newExecutionState);
 
 		// Update property "properties/status" in external AAS
-		aasServerConnection.setModelPropertyValue("/aas/submodels/Status/dataElements/status/value",
-				newExecutionState.getValue());
+		String elementPath = "/aas/submodels/Status/dataElements/status/value";
+		aasServerConnection.setModelPropertyValue(elementPath, newExecutionState.getValue());
 	}
 
 	/*********************************************************************************************************

@@ -1,6 +1,5 @@
 package org.srfg;
 
-import org.srfg.panda.PandaAdapter;
 import org.srfg.panda.PandaDevice;
 
 /********************************************************************************************************
@@ -17,9 +16,8 @@ public class MainClass {
         PandaDevice device = new PandaDevice(1, "http://localhost:8080/basys.examples/Components/Directory/SQL");
         device.start();
 
-        // ROS panda adapter
-        PandaAdapter adapter = new PandaAdapter();
-        adapter.establishROSConnection();
+        // init ROS panda communication
+        device.establishROSConnection();
 
         // wait forever in main thread
         // worker threads will listen to subscribed ROS nodes
