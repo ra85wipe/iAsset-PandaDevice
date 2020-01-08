@@ -14,15 +14,16 @@ import org.eclipse.basyx.submodel.metamodel.map.SubModel;
 import org.eclipse.basyx.submodel.metamodel.map.qualifier.Description;
 import org.eclipse.basyx.submodel.metamodel.map.reference.Reference;
 import org.eclipse.basyx.submodel.metamodel.map.submodelelement.property.Property;
+import org.eclipse.basyx.vab.exception.ServerException;
 import org.eclipse.basyx.vab.manager.VABConnectionManager;
 import org.eclipse.basyx.vab.modelprovider.VABElementProxy;
 import org.eclipse.basyx.vab.modelprovider.map.VABMapProvider;
 import org.eclipse.basyx.vab.protocol.basyx.server.BaSyxTCPServer;
 import org.eclipse.basyx.vab.protocol.http.connector.HTTPConnectorProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.srfg.panda.franka.*;
-import org.srfg.panda.nodes.*;
 import org.srfg.support.directory.ExamplesPreconfiguredDirectory;
-import org.ros.node.ConnectedNode;
 
 
 /********************************************************************************************************
@@ -35,21 +36,22 @@ import org.ros.node.ConnectedNode;
  * @author mathias.schmoigl
  ********************************************************************************************************/
 public class PandaDevice extends BaseSmartDevice {
+
+	private static Logger logger = LoggerFactory.getLogger(PandaDevice.class);
 	
 	/*********************************************************************************************************
-	 * protected members
+	 * protected members required for server client communication
 	 ********************************************************************************************************/
 	protected int serverPort = -1; // Server port	
 	protected BaSyxTCPServer<VABMapProvider> server = null; // BaSyx/TCP Server that exports the control component
 	protected VABElementProxy aasServerConnection = null; // AAS server connection
-	
-	// contains all franka information
+
+	/*********************************************************************************************************
+	 * private members required for panda communication via ROS
+	 ********************************************************************************************************/
 	private FrankaState frankaState;
 	private JointState jointState;
-	
-	// is the bridge to kafka world
 	private PandaAdapter pandaAdapter;
-
 	
 	/*********************************************************************************************************
 	 * Getter/Setter
@@ -91,6 +93,149 @@ public class PandaDevice extends BaseSmartDevice {
 		setRegistry(new AASRegistryProxy(registryUrl));
 		setConnectionManager(new VABConnectionManager(new ExamplesPreconfiguredDirectory(), new HTTPConnectorProvider()));
 	}
+
+	/*********************************************************************************************************
+	 * Start panda device
+	 ********************************************************************************************************/
+	@Override
+	public void start() {
+
+		super.start();
+
+		// the device creates a value if a server connection can be established
+		if(CreateAASDeviceOnServer("AASServer", "idShort", "DeviceIDShort", "/aas"))
+		{
+			// create the device's sub model structure with own ID and push it to server
+			CreatePandaSubModel();
+
+			// Register control component as local sub model (This sub model will stay with the device) and start server
+			server = new BaSyxTCPServer<>(new VABMapProvider(getControlComponent()), serverPort);
+			server.start();
+
+			// Register AAS and sub models in directory (push AAS descriptor to server)
+			String aasRepoURL = "http://localhost:8080/basys.examples/Components/BaSys/1.0/aasServer/aas";
+			RegisterSubModelsInDirectory(aasRepoURL, aasRepoURL + "/submodels/Status",
+					"basyx://127.0.0.1:" + serverPort + "/submodels/Controller");
+		}
+	}
+
+	/*********************************************************************************************************
+	 * Stop panda device
+	 ********************************************************************************************************/
+	@Override
+	public void stop() {
+		server.stop(); // Stop local BaSyx/TCP server
+	}
+
+	/*********************************************************************************************************
+	 * Wait for completion of all threads
+	 ********************************************************************************************************/
+	@Override
+	public void waitFor() {
+		server.waitFor(); // Wait for server end
+	}
+
+
+	/*********************************************************************************************************
+	 * Smart device control component indicates an execution state change
+	 ********************************************************************************************************/
+	@Override
+	public void onChangedExecutionState(ExecutionState newExecutionState) {
+
+		super.onChangedExecutionState(newExecutionState);
+
+		// Update property "properties/status" in external AAS
+		aasServerConnection.setModelPropertyValue("/aas/submodels/Status/dataElements/status/value",
+				newExecutionState.getValue());
+	}
+
+	/*********************************************************************************************************
+	 * CreateValueOnConnectedServer
+	 * Create this AAS device as a value on a connected server
+	 ********************************************************************************************************/
+	private boolean CreateAASDeviceOnServer(String urnVABElement, String aasPath, String aasValue, String elementPath) {
+
+		try
+		{
+			aasServerConnection = this.getConnectionManager().connectToVABElement(urnVABElement); // Connect to AAS server
+			AssetAdministrationShell aas = new AssetAdministrationShell().putPath(aasPath, aasValue); // Create device AAS
+			aasServerConnection.createValue(elementPath, aas); // Transfer device AAS to server -> fails if not connected
+			return true;
+		}
+		catch (ServerException e)
+		{
+			logger.debug("An exception occured while attempting to create aas device on server! Message was: " +  e.getMessage());
+			return false; // no connection
+		}
+	}
+
+	/*********************************************************************************************************
+	 * CreateSubModel
+	 * Create generic sub model and add properties
+	 ********************************************************************************************************/
+	private void CreatePandaSubModel() {
+
+		SubModel sub = new SubModel();
+		sub.setIdShort("FrankaPanda");
+		sub.setSemanticID((IReference) new Reference().put("27380107", null)); // e-class-ID "Roboterarm"
+		sub.setDescription(new Description("en", "Franka Panda submodel implements aas example for the iAsset Platform"));
+
+		// add property for robot mode
+		Property modeProp = new Property(frankaState.robot_mode);
+		modeProp.setIdShort("robotMode");
+		modeProp.setSemanticID((IReference) new Reference().put("0173-1#02-AAK543#004", null)); // e-class-ID "anwenderrelevante Ausführung"
+		modeProp.setDescription(new Description("en", "robot mode represents current state of franka panda robot"));
+		sub.addSubModelElement(modeProp);
+
+		// add properties for positions in 3D working env
+		Property positionXProp = new Property(frankaState.O_T_EE[12]);
+		positionXProp.setIdShort("posX");
+		positionXProp.setSemanticID((IReference) new Reference().put("0173-1#02-AAZ424#001", null)); // e-class-ID "Positionserkennung"
+		positionXProp.setDescription(new Description("en", "franka panda robot end effector position X"));
+		positionXProp.addDataSpecificationReference((IReference) new Reference().put("Centimeters", null));
+		sub.addSubModelElement(positionXProp);
+
+		Property positionYProp = new Property(frankaState.O_T_EE[13]);
+		positionYProp.setIdShort("posY");
+		positionYProp.setSemanticID((IReference) new Reference().put("0173-1#02-AAZ424#001", null)); // e-class-ID "Positionserkennung"
+		positionYProp.setDescription(new Description("en", "franka panda robot end effector position Y"));
+		positionYProp.addDataSpecificationReference((IReference) new Reference().put("Newton", null));
+		sub.addSubModelElement(positionYProp);
+
+		Property positionZProp = new Property(frankaState.O_T_EE[14]);
+		positionZProp.setIdShort("posZ");
+		positionZProp.setSemanticID((IReference) new Reference().put("0173-1#02-AAZ424#001", null)); // e-class-ID "Positionserkennung"
+		positionZProp.setDescription(new Description("en", "franka panda robot end effector position Z"));
+		positionZProp.addDataSpecificationReference((IReference) new Reference().put("Centimeters", null));
+		sub.addSubModelElement(positionZProp);
+
+		// add property for panda force
+		Property forceProp = new Property(frankaState.O_F_ext_hat_K[3]);
+		forceProp.setIdShort("z-force");
+		forceProp.setSemanticID((IReference) new Reference().put("0173-1#02-AAI621#002", null)); // e-class-ID "Hebekraft"
+		forceProp.setDescription(new Description("en", "franka panda robot force for z-axis"));
+		forceProp.addDataSpecificationReference((IReference) new Reference().put("Centimeters", null));
+		sub.addSubModelElement(forceProp);
+
+		// add property for gripper states
+		Property gripperProp = new Property(jointState.position[8] + jointState.position[9]); // gripper distance
+		gripperProp.setIdShort("gripper distance");
+		gripperProp.setSemanticID((IReference) new Reference().put("0173-1#02-AAZ424#001", null)); // e-class-ID "Positionserkennung"
+		gripperProp.setDescription(new Description("en", "distance of gripper parts to each other"));
+		gripperProp.addDataSpecificationReference((IReference) new Reference().put("Centimeters", null));
+		sub.addSubModelElement(gripperProp);
+
+		// TEST:
+		// Property statistics: export invocation statistics for every service
+		// invocations: indicate total service invocations.
+		// Properties are not persisted in this example, therefore start counting always at 0.
+		Property invocationsProp = new Property(0);
+		invocationsProp.setIdShort("invocations");
+		sub.addSubModelElement(invocationsProp);
+
+		// Transfer device sub model to server
+		aasServerConnection.createValue("/aas/submodels", sub);
+	}
 	
 	/*********************************************************************************************************
 	 * Indicate a service invocation
@@ -109,150 +254,17 @@ public class PandaDevice extends BaseSmartDevice {
 	}
 	
 	/*********************************************************************************************************
-	 * Smart device control component indicates an execution state change
-	 ********************************************************************************************************/
-	@Override
-	public void onChangedExecutionState(ExecutionState newExecutionState) {
-
-		super.onChangedExecutionState(newExecutionState);
-		
-		// Update property "properties/status" in external AAS
-		aasServerConnection.setModelPropertyValue("/aas/submodels/Status/dataElements/status/value",
-				newExecutionState.getValue());
-	}
-	
-	/*********************************************************************************************************
-	 * CreateSubModel
-	 * Create generic sub model and add properties
-	 ********************************************************************************************************/
-	private void CreatePandaSubModel() {
-		
-		SubModel sub = new SubModel();
-		sub.setIdShort("FrankaPanda");
-		sub.setSemanticID((IReference) new Reference().put("27380107", null)); // e-class-ID "Roboterarm"
-		sub.setDescription(new Description("en", "Franka Panda submodel implements aas example for the iAsset Platform"));
-
-		
-		// add property for robot mode
-		Property modeProp = new Property(frankaState.robot_mode);
-		modeProp.setIdShort("robotMode");
-		modeProp.setSemanticID((IReference) new Reference().put("0173-1#02-AAK543#004", null)); // e-class-ID "anwenderrelevante Ausführung"
-		modeProp.setDescription(new Description("en", "robot mode represents current state of franka panda robot"));	
-		sub.addSubModelElement(modeProp);		
-		
-		
-		// add properties for positions in 3D working env
-		Property positionXProp = new Property(frankaState.O_T_EE[12]);
-		positionXProp.setIdShort("posX");
-		positionXProp.setSemanticID((IReference) new Reference().put("0173-1#02-AAZ424#001", null)); // e-class-ID "Positionserkennung"
-		positionXProp.setDescription(new Description("en", "franka panda robot end effector position X"));
-		positionXProp.addDataSpecificationReference((IReference) new Reference().put("Centimeters", null));
-		sub.addSubModelElement(positionXProp);
-		
-		Property positionYProp = new Property(frankaState.O_T_EE[13]);
-		positionYProp.setIdShort("posY");
-		positionYProp.setSemanticID((IReference) new Reference().put("0173-1#02-AAZ424#001", null)); // e-class-ID "Positionserkennung"
-		positionYProp.setDescription(new Description("en", "franka panda robot end effector position Y"));
-		positionYProp.addDataSpecificationReference((IReference) new Reference().put("Newton", null));
-		sub.addSubModelElement(positionYProp);
-		
-		Property positionZProp = new Property(frankaState.O_T_EE[14]);
-		positionZProp.setIdShort("posZ");
-		positionZProp.setSemanticID((IReference) new Reference().put("0173-1#02-AAZ424#001", null)); // e-class-ID "Positionserkennung"
-		positionZProp.setDescription(new Description("en", "franka panda robot end effector position Z"));
-		positionZProp.addDataSpecificationReference((IReference) new Reference().put("Centimeters", null));
-		sub.addSubModelElement(positionZProp);
-		
-		
-		// add property for panda force 
-		Property forceProp = new Property(frankaState.O_F_ext_hat_K[3]);
-		forceProp.setIdShort("z-force");
-		forceProp.setSemanticID((IReference) new Reference().put("0173-1#02-AAI621#002", null)); // e-class-ID "Hebekraft"
-		forceProp.setDescription(new Description("en", "franka panda robot force for z-axis"));
-		forceProp.addDataSpecificationReference((IReference) new Reference().put("Centimeters", null));
-		sub.addSubModelElement(forceProp);
-		
-		
-		// add property for gripper states
-		Property gripperProp = new Property(jointState.position[8] + jointState.position[9]); // gripper distance
-		gripperProp.setIdShort("gripper distance");
-		gripperProp.setSemanticID((IReference) new Reference().put("0173-1#02-AAZ424#001", null)); // e-class-ID "Positionserkennung"
-		gripperProp.setDescription(new Description("en", "distance of gripper parts to each other"));
-		gripperProp.addDataSpecificationReference((IReference) new Reference().put("Centimeters", null));
-		sub.addSubModelElement(gripperProp);
-		
-
-		// TEST:
-		// Property statistics: export invocation statistics for every service
-		// invocations: indicate total service invocations. 
-		// Properties are not persisted in this example, therefore start counting always at 0.
-		Property invocationsProp = new Property(0);
-		invocationsProp.setIdShort("invocations");
-		sub.addSubModelElement(invocationsProp);
-				
-		
-		// Transfer device sub model to server
-		aasServerConnection.createValue("/aas/submodels", sub);
-	}
-	
-	/*********************************************************************************************************
 	 * RegisterSubModelsInDirectory
 	 * Build an AAS descriptor, add sub model descriptors to it and push AAS descriptor to server
 	 * @param aasRepoURL
 	 ********************************************************************************************************/
-	private void RegisterSubModelsInDirectory(String aasRepoURL) {
+	private void RegisterSubModelsInDirectory(String aasRepoURL, String statusEndpoint, String controllerEndpoint) {
 		
-		AASDescriptor deviceAASDescriptor = new AASDescriptor(lookupURN("AAS"), aasRepoURL);
+		AASDescriptor deviceDesc = new AASDescriptor(lookupURN("AAS"), aasRepoURL);
+
+		deviceDesc.addSubmodelDescriptor(new SubmodelDescriptor("Status", lookupURN("Status"), statusEndpoint));
+		deviceDesc.addSubmodelDescriptor(new SubmodelDescriptor("Controller", lookupURN("Controller"), controllerEndpoint));
 				
-		SubmodelDescriptor statusSMDescriptor = 
-				new SubmodelDescriptor("Status", lookupURN("Status"), aasRepoURL + "/submodels/Status");
-		
-		SubmodelDescriptor controllerSMDescriptor = 
-				new SubmodelDescriptor("Controller", lookupURN("Controller"), "basyx://127.0.0.1:" + serverPort + "/submodels/Controller");
-				
-		deviceAASDescriptor.addSubmodelDescriptor(statusSMDescriptor);
-		deviceAASDescriptor.addSubmodelDescriptor(controllerSMDescriptor);
-				
-		getRegistry().register(deviceAASDescriptor); // Push AAS descriptor to server
-	}
-
-	/*********************************************************************************************************
-	 * Start panda device
-	 ********************************************************************************************************/
-	@Override
-	public void start() {
-
-		super.start();
-
-		aasServerConnection = this.getConnectionManager().connectToVABElement("AASServer"); // Connect to AAS server
-		AssetAdministrationShell aas = new AssetAdministrationShell().putPath("idShort", "DeviceIDShort"); // Create device AAS
-		aasServerConnection.createValue("/aas", aas); // - Transfer device AAS to server
-
-		// The device also brings a sub model structure with an own ID that is being pushed on the server
-		CreatePandaSubModel();
-		
-		// Register control component as local sub model (This sub model will stay with the device)
-		// Start local BaSyx/TCP server
-		server = new BaSyxTCPServer<>(new VABMapProvider(getControlComponent()), serverPort);
-		server.start();
-		
-		// Register AAS and sub models in directory (push AAS descriptor to server)
-		RegisterSubModelsInDirectory("http://localhost:8080/basys.examples/Components/BaSys/1.0/aasServer/aas");
-	}
-
-	/*********************************************************************************************************
-	 * Stop panda device
-	 ********************************************************************************************************/
-	@Override
-	public void stop() {		
-		server.stop(); // Stop local BaSyx/TCP server
-	}
-
-	/*********************************************************************************************************
-	 * Wait for completion of all threads
-	 ********************************************************************************************************/
-	@Override
-	public void waitFor() {
-		server.waitFor(); // Wait for server end
+		getRegistry().register(deviceDesc); // Push AAS descriptor to server
 	}
 }
