@@ -118,7 +118,7 @@ public class PandaDevice extends BaseSmartDevice {
 			server.start();
 
 			// Register AAS and sub models in directory (push AAS descriptor to server)
-			String aasRepoURL = "http://localhost:8080/basys.examples/Components/BaSys/1.0/aasServer/aas";
+			String aasRepoURL = "http://localhost:8085/assetregistry"; // http://localhost:8080/basys.examples/Components/BaSys/1.0/aasServer/aas
 			RegisterSubModelsInDirectory(aasRepoURL, aasRepoURL + "/submodels/Status",
 					"basyx://127.0.0.1:" + serverPort + "/submodels/Controller");
 		}

@@ -20,6 +20,7 @@ public class ExamplesPreconfiguredDirectory extends InMemoryDirectory {
 
 		// Define mappings
 		// - AAS server mapping
-		addMapping("AASServer", "http://localhost:8080/basys.examples/Components/BaSys/1.0/aasServer/");
+		//addMapping("AASServer", "http://localhost:8080/basys.examples/Components/BaSys/1.0/aasServer/");
+		addMapping("AASServer", "http://localhost:8085/assetregistry");
 	}	
 }
