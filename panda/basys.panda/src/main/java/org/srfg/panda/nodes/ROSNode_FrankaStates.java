@@ -50,6 +50,18 @@ public class ROSNode_FrankaStates extends AbstractNodeMain {
 			public void onNewMessage(franka_msgs.FrankaState message) {
 
 				log.info(message.getHeader().getSeq()); // log message package seq number
+
+				byte robot_mode = message.getRobotMode();    	// frankaState.robot_mode
+				double effector_pos_X = message.getOTEE()[12];	// frankaState.O_T_EE[12]
+				double effector_pos_Y = message.getOTEE()[13]; 	// frankaState.O_T_EE[13]
+				double effector_pos_Z = message.getOTEE()[14];	// frankaState.O_T_EE[14]
+				double z_force = message.getOFExtHatK()[3];		// frankaState.O_F_ext_hat_K[3]
+
+				log.info("robot mode is: " + robot_mode);
+				log.info("effector position for xyz is: " + effector_pos_X + "," + effector_pos_Y + "," + effector_pos_Z);
+				log.info("force on z-axis is: " + z_force);
+
+				// TODO: send information using iAssetDistributionService
 			}
 		});
 	}

@@ -49,6 +49,10 @@ public class ROSNode_JointStates extends AbstractNodeMain {
 			public void onNewMessage(sensor_msgs.JointState message) {
 
 				log.info(message.getHeader().getSeq()); // log message package seq number
+				double gripper_distance = message.getPosition()[8] + message.getPosition()[9];	// jointState.position[8] + jointState.position[9]
+				log.info("gripper distance is: " + gripper_distance);
+
+				// TODO: send information using iAssetDistributionService
 			}
 		});
 	}

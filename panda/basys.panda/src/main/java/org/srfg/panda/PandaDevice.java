@@ -46,24 +46,10 @@ public class PandaDevice extends BaseSmartDevice {
 	 * private members required for panda communication via ROS
 	 ********************************************************************************************************/
 	private ROSNodeManager nodeManager = new ROSNodeManager();
-	private FrankaState frankaState;
-	private JointState jointState;
 	
 	/*********************************************************************************************************
 	 * Getter/Setter
 	 ********************************************************************************************************/
-	public FrankaState getFrankaState() { return frankaState; }
-	public void setFrankaState(FrankaState frankaState) {
-		this.frankaState = frankaState;
-	}
-
-	public JointState getJointState() {
-		return jointState;
-	}
-	public void setJointState(JointState jointState) {
-		this.jointState = jointState;
-	}
-	
 	public ROSNodeManager getROSNodeManager() {
 		return nodeManager;
 	}
@@ -174,28 +160,28 @@ public class PandaDevice extends BaseSmartDevice {
 		sub.setDescription(new Description("en", "Franka Panda submodel implements aas example for the iAsset Platform"));
 
 		// add property for robot mode
-		Property modeProp = new Property(frankaState.robot_mode);
+		Property modeProp = new Property(0);
 		modeProp.setIdShort("robotMode");
 		modeProp.setSemanticID((IReference) new Reference().put("0173-1#02-AAK543#004", null)); // e-class-ID "anwenderrelevante Ausführung"
 		modeProp.setDescription(new Description("en", "robot mode represents current state of franka panda robot"));
 		sub.addSubModelElement(modeProp);
 
 		// add properties for positions in 3D working env
-		Property positionXProp = new Property(frankaState.O_T_EE[12]);
+		Property positionXProp = new Property(0);
 		positionXProp.setIdShort("posX");
 		positionXProp.setSemanticID((IReference) new Reference().put("0173-1#02-AAZ424#001", null)); // e-class-ID "Positionserkennung"
 		positionXProp.setDescription(new Description("en", "franka panda robot end effector position X"));
 		positionXProp.addDataSpecificationReference((IReference) new Reference().put("Centimeters", null));
 		sub.addSubModelElement(positionXProp);
 
-		Property positionYProp = new Property(frankaState.O_T_EE[13]);
+		Property positionYProp = new Property(0);
 		positionYProp.setIdShort("posY");
 		positionYProp.setSemanticID((IReference) new Reference().put("0173-1#02-AAZ424#001", null)); // e-class-ID "Positionserkennung"
 		positionYProp.setDescription(new Description("en", "franka panda robot end effector position Y"));
 		positionYProp.addDataSpecificationReference((IReference) new Reference().put("Newton", null));
 		sub.addSubModelElement(positionYProp);
 
-		Property positionZProp = new Property(frankaState.O_T_EE[14]);
+		Property positionZProp = new Property(0);
 		positionZProp.setIdShort("posZ");
 		positionZProp.setSemanticID((IReference) new Reference().put("0173-1#02-AAZ424#001", null)); // e-class-ID "Positionserkennung"
 		positionZProp.setDescription(new Description("en", "franka panda robot end effector position Z"));
@@ -203,7 +189,7 @@ public class PandaDevice extends BaseSmartDevice {
 		sub.addSubModelElement(positionZProp);
 
 		// add property for panda force
-		Property forceProp = new Property(frankaState.O_F_ext_hat_K[3]);
+		Property forceProp = new Property(0);
 		forceProp.setIdShort("z-force");
 		forceProp.setSemanticID((IReference) new Reference().put("0173-1#02-AAI621#002", null)); // e-class-ID "Hebekraft"
 		forceProp.setDescription(new Description("en", "franka panda robot force for z-axis"));
@@ -211,7 +197,7 @@ public class PandaDevice extends BaseSmartDevice {
 		sub.addSubModelElement(forceProp);
 
 		// add property for gripper states
-		Property gripperProp = new Property(jointState.position[8] + jointState.position[9]); // gripper distance
+		Property gripperProp = new Property(0);
 		gripperProp.setIdShort("gripper distance");
 		gripperProp.setSemanticID((IReference) new Reference().put("0173-1#02-AAZ424#001", null)); // e-class-ID "Positionserkennung"
 		gripperProp.setDescription(new Description("en", "distance of gripper parts to each other"));
