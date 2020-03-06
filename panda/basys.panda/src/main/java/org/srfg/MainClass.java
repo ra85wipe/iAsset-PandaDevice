@@ -13,7 +13,7 @@ public class MainClass {
     public static void main(String[] args)
     {
         // AAS device implementation of panda
-        PandaDevice device = new PandaDevice(1, "http://localhost:8085/assetregistry"); // http://localhost:8080/basys.examples/Components/Directory/SQL
+        PandaDevice device = new PandaDevice("http://localhost:8085/assetregistry"); // http://localhost:8080/basys.examples/Components/Directory/SQL
         device.start();
 
         // init ROS panda communication

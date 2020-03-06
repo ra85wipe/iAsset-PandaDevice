@@ -13,7 +13,7 @@ import org.junit.Test;
 public class PandaDeviceTest {
 	
 	// device under test
-	PandaDevice testDevice = new PandaDevice(1, "http://localhost:8080/basys.examples/Components/Directory/SQL");
+	//PandaDevice testDevice = new PandaDevice("http://localhost:8080/basys.examples/Components/Directory/SQL");
 	
 
 	/*********************************************************************************************************
