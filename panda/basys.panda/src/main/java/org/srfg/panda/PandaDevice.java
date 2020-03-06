@@ -17,8 +17,6 @@ import org.eclipse.basyx.submodel.metamodel.map.submodelelement.property.Propert
 import org.eclipse.basyx.vab.exception.ServerException;
 import org.eclipse.basyx.vab.manager.VABConnectionManager;
 import org.eclipse.basyx.vab.modelprovider.VABElementProxy;
-import org.eclipse.basyx.vab.modelprovider.map.VABMapProvider;
-import org.eclipse.basyx.vab.protocol.basyx.server.BaSyxTCPServer;
 import org.eclipse.basyx.vab.protocol.http.connector.HTTPConnectorProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +40,6 @@ public class PandaDevice extends BaseSmartDevice {
 	/*********************************************************************************************************
 	 * protected members required for server client communication
 	 ********************************************************************************************************/
-	protected int serverPort = -1; // Server port	
-	//protected BaSyxTCPServer<VABMapProvider> server = null; // BaSyx/TCP Server that exports the control component
 	protected VABElementProxy aasServerConnection = null; // AAS server connection
 
 	/*********************************************************************************************************
@@ -83,10 +79,9 @@ public class PandaDevice extends BaseSmartDevice {
 	/*********************************************************************************************************
 	 * Constructor
 	 ********************************************************************************************************/
-	public PandaDevice(int port, String registryUrl) {
+	public PandaDevice(String registryUrl) {
 		
 		super();
-		serverPort = port;
 
 		// Register URNs of managed VAB objects
 		addShortcut("FrankaPandaAAS",        new ModelUrn("urn:de.FHG:devices.es.iese:FrankaPandaAAS:1.0:3:x-509#001"));
@@ -111,14 +106,9 @@ public class PandaDevice extends BaseSmartDevice {
 			// create the device's sub model structure with own ID and push it to server
 			CreatePandaSubModel();
 
-			// Register control component as local sub model (This sub model will stay with the device) and start server
-			//server = new BaSyxTCPServer<>(new VABMapProvider(getControlComponent()), serverPort);
-			//server.start();
-
 			// Register AAS and sub models in directory (push AAS descriptor to server)
 			String aasRepoURL = "http://localhost:8085/assetregistry"; // http://localhost:8080/basys.examples/Components/BaSys/1.0/aasServer/aas
-			RegisterSubModelsInDirectory(aasRepoURL, aasRepoURL + "/submodels/Status",
-					"basyx://127.0.0.1:" + serverPort + "/submodels/Controller");
+			RegisterSubModelsInDirectory(aasRepoURL, aasRepoURL + "/submodels/FrankaPandaSubModel");
 		}
 	}
 
@@ -127,7 +117,7 @@ public class PandaDevice extends BaseSmartDevice {
 	 ********************************************************************************************************/
 	@Override
 	public void stop() {
-		//server.stop(); // Stop local BaSyx/TCP server
+		//TODO: stop ROS subscriber threads one after another
 	}
 
 	/*********************************************************************************************************
@@ -135,7 +125,7 @@ public class PandaDevice extends BaseSmartDevice {
 	 ********************************************************************************************************/
 	@Override
 	public void waitFor() {
-		//server.waitFor(); // Wait for server end
+		//TODO: wait for ROS subscriber threads
 	}
 
 
@@ -148,7 +138,7 @@ public class PandaDevice extends BaseSmartDevice {
 		super.onChangedExecutionState(newExecutionState);
 
 		// Update property "properties/status" in external AAS
-		String elementPath = "/aas/submodels/Status/dataElements/status/value";
+		String elementPath = "/aas/submodels/FrankaPandaSubModel/dataElements/status/value";
 		aasServerConnection.setModelPropertyValue(elementPath, newExecutionState.getValue());
 	}
 
@@ -228,7 +218,7 @@ public class PandaDevice extends BaseSmartDevice {
 		gripperProp.addDataSpecificationReference((IReference) new Reference().put("Centimeters", null));
 		sub.addSubModelElement(gripperProp);
 
-		// TEST:
+		// TODO: test access increment on server requests as soon as server works
 		// Property statistics: export invocation statistics for every service
 		// invocations: indicate total service invocations.
 		// Properties are not persisted in this example, therefore start counting always at 0.
@@ -250,10 +240,10 @@ public class PandaDevice extends BaseSmartDevice {
 		super.onServiceInvocation();
 		
 		// Implement the device invocation counter - read and increment invocation counter
-		Map<String, Object> property = (Map<String, Object>) aasServerConnection
-				.getModelPropertyValue("/aas/submodels/Status/" + SubModel.PROPERTIES + "/invocations");
+		Map<String, Object> property
+				= (Map<String, Object>) aasServerConnection.getModelPropertyValue("/aas/submodels/FrankaPandaSubModel/" + SubModel.PROPERTIES + "/invocations");
 		int invocations = (int) property.get("value");
-		aasServerConnection.setModelPropertyValue("/aas/submodels/Status/dataElements/invocations/value", ++invocations);
+		aasServerConnection.setModelPropertyValue("/aas/submodels/FrankaPandaSubModel/dataElements/invocations/value", ++invocations);
 	}
 	
 	/*********************************************************************************************************
@@ -261,11 +251,10 @@ public class PandaDevice extends BaseSmartDevice {
 	 * Build an AAS descriptor, add sub model descriptors to it and push AAS descriptor to server
 	 * @param aasRepoURL
 	 ********************************************************************************************************/
-	private void RegisterSubModelsInDirectory(String aasRepoURL, String statusEndpoint, String controllerEndpoint) {
+	private void RegisterSubModelsInDirectory(String aasRepoURL, String endpoint) {
 		
 		AASDescriptor deviceDesc = new AASDescriptor(lookupURN("FrankaPandaAAS"), aasRepoURL);
-		deviceDesc.addSubmodelDescriptor(new SubmodelDescriptor("FrankaPandaSubModel", lookupURN("FrankaPandaSubModel"), statusEndpoint));
-				
+		deviceDesc.addSubmodelDescriptor(new SubmodelDescriptor("FrankaPandaSubModel", lookupURN("FrankaPandaSubModel"), endpoint));
 		getRegistry().register(deviceDesc); // Push AAS descriptor to server
 	}
 }
