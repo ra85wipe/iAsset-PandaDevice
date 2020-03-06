@@ -31,8 +31,7 @@ import org.srfg.support.directory.ExamplesPreconfiguredDirectory;
  * This class implements the smart manufacturing robot franka panda
  * 
  * The device pushes its AAS to an external asset administration shell server
- * - The sub model "statusSM" is pushed to the external asset administration shell server as well
- * - The sub model "controllerSM" is provided by an BaSyx/TCP server of the smart device
+ * - The sub model "FrankaPandaSubModel" is pushed to the aas server as well
  * 
  * @author mathias.schmoigl
  ********************************************************************************************************/
@@ -44,7 +43,7 @@ public class PandaDevice extends BaseSmartDevice {
 	 * protected members required for server client communication
 	 ********************************************************************************************************/
 	protected int serverPort = -1; // Server port	
-	protected BaSyxTCPServer<VABMapProvider> server = null; // BaSyx/TCP Server that exports the control component
+	//protected BaSyxTCPServer<VABMapProvider> server = null; // BaSyx/TCP Server that exports the control component
 	protected VABElementProxy aasServerConnection = null; // AAS server connection
 
 	/*********************************************************************************************************
@@ -90,9 +89,8 @@ public class PandaDevice extends BaseSmartDevice {
 		serverPort = port;
 
 		// Register URNs of managed VAB objects
-		addShortcut("AAS",        new ModelUrn("urn:de.FHG:devices.es.iese:aas:1.0:3:x-509#001"));
-		addShortcut("Status",     new ModelUrn("urn:de.FHG:devices.es.iese:statusSM:1.0:3:x-509#001"));
-		addShortcut("Controller", new ModelUrn("urn:de.FHG:devices.es.iese:controllerSM:1.0:3:x-509#001"));
+		addShortcut("FrankaPandaAAS",        new ModelUrn("urn:de.FHG:devices.es.iese:FrankaPandaAAS:1.0:3:x-509#001"));
+		addShortcut("FrankaPandaSubModel",     new ModelUrn("urn:de.FHG:devices.es.iese:FrankaPandaSubModel:1.0:3:x-509#001"));
 
 		// Configure BaSyx service - registry and connection manager
 		setRegistry(new AASRegistryProxy(registryUrl));
@@ -108,14 +106,14 @@ public class PandaDevice extends BaseSmartDevice {
 		super.start();
 
 		// the device creates a value if a server connection can be established
-		if(CreateAASDeviceOnServer("AASServer", "idShort", "DeviceIDShort", "/aas"))
+		if(CreateAASDeviceOnServer("AASServer", "AASPath", "AASValue", "/aas"))
 		{
 			// create the device's sub model structure with own ID and push it to server
 			CreatePandaSubModel();
 
 			// Register control component as local sub model (This sub model will stay with the device) and start server
-			server = new BaSyxTCPServer<>(new VABMapProvider(getControlComponent()), serverPort);
-			server.start();
+			//server = new BaSyxTCPServer<>(new VABMapProvider(getControlComponent()), serverPort);
+			//server.start();
 
 			// Register AAS and sub models in directory (push AAS descriptor to server)
 			String aasRepoURL = "http://localhost:8085/assetregistry"; // http://localhost:8080/basys.examples/Components/BaSys/1.0/aasServer/aas
@@ -129,7 +127,7 @@ public class PandaDevice extends BaseSmartDevice {
 	 ********************************************************************************************************/
 	@Override
 	public void stop() {
-		server.stop(); // Stop local BaSyx/TCP server
+		//server.stop(); // Stop local BaSyx/TCP server
 	}
 
 	/*********************************************************************************************************
@@ -137,7 +135,7 @@ public class PandaDevice extends BaseSmartDevice {
 	 ********************************************************************************************************/
 	@Override
 	public void waitFor() {
-		server.waitFor(); // Wait for server end
+		//server.waitFor(); // Wait for server end
 	}
 
 
@@ -181,7 +179,7 @@ public class PandaDevice extends BaseSmartDevice {
 	private void CreatePandaSubModel() {
 
 		SubModel sub = new SubModel();
-		sub.setIdShort("FrankaPanda");
+		sub.setIdShort("FrankaPandaSubModel");
 		sub.setSemanticID((IReference) new Reference().put("27380107", null)); // e-class-ID "Roboterarm"
 		sub.setDescription(new Description("en", "Franka Panda submodel implements aas example for the iAsset Platform"));
 
@@ -265,10 +263,8 @@ public class PandaDevice extends BaseSmartDevice {
 	 ********************************************************************************************************/
 	private void RegisterSubModelsInDirectory(String aasRepoURL, String statusEndpoint, String controllerEndpoint) {
 		
-		AASDescriptor deviceDesc = new AASDescriptor(lookupURN("AAS"), aasRepoURL);
-
-		deviceDesc.addSubmodelDescriptor(new SubmodelDescriptor("Status", lookupURN("Status"), statusEndpoint));
-		deviceDesc.addSubmodelDescriptor(new SubmodelDescriptor("Controller", lookupURN("Controller"), controllerEndpoint));
+		AASDescriptor deviceDesc = new AASDescriptor(lookupURN("FrankaPandaAAS"), aasRepoURL);
+		deviceDesc.addSubmodelDescriptor(new SubmodelDescriptor("FrankaPandaSubModel", lookupURN("FrankaPandaSubModel"), statusEndpoint));
 				
 		getRegistry().register(deviceDesc); // Push AAS descriptor to server
 	}
